@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reveal Sdk - Create New Dashboard</title>
+</head>
+
+<body>
+    <div id="viewer"  style="height: calc(100vh - 20px); width: 100%;"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+    <script src="https://dl.revealbi.io/reveal/libs/1.6.7/infragistics.reveal.js"></script>
+
+    <script type="text/javascript">
+        $.ig.RevealSdkSettings.setBaseUrl("http://localhost:7066/");
+        $.ig.RevealSdkSettings.enableActionsOnHoverTooltip = true;
+
+        const headers = {};
+        $.ig.RevealSdkSettings.setAdditionalHeadersProvider(function (url) {
+            headers["x-header-one"] ="ALFKI";
+            return headers;
+        });
+
+        // theme = new $.ig.OceanDarkTheme();
+        // $.ig.RevealSdkSettings.theme = theme;
+        
+        var revealView = new $.ig.RevealView("#viewer");
+        revealView.interactiveFilteringEnabled = true;
+        revealView.startInEditMode = true;    
+       // revealView.showEditDataSource = false;
+        revealView.onDataSourcesRequested = (callback) => {
+        
+            var sqlServerDataSource = new $.ig.RVSqlServerDataSource();
+            sqlServerDataSource.id="sqlServer";
+            sqlServerDataSource.title = "SQL Server Data Source";
+            sqlServerDataSource.subtitle = "Full Northwind Database";
+
+            // SQL Server Data Source Item in Stored Procs
+            var sqlDataSourceItem1 = new $.ig.RVSqlServerDataSourceItem(sqlServerDataSource);
+            sqlDataSourceItem1.id="CustomerOrders";
+            sqlDataSourceItem1.title = "Customer Orders";
+            sqlDataSourceItem1.subtitle = "Custom SQL Query";
+
+            var sqlDataSourceItem2 = new $.ig.RVSqlServerDataSourceItem(sqlServerDataSource);
+            sqlDataSourceItem2.id="TenMostExpensiveProducts";
+            sqlDataSourceItem2.title = "TenMost Expensive Products";
+            sqlDataSourceItem2.subtitle = "Stored Procedure";
+
+            var sqlDataSourceItem3 = new $.ig.RVSqlServerDataSourceItem(sqlServerDataSource);
+            sqlDataSourceItem3.id="CustOrdersOrders";
+            sqlDataSourceItem3.title = "Customer Orders Orders";
+            sqlDataSourceItem3.subtitle = "Stored Procedure (Parameter)";
+
+            //**********************************************
+            //Note, this is the callback that loads everything above into the dialog.  If you don't want to show the entire
+            //database, just remove sqlServerDataSource from the array and leave it empty like this []
+            callback(new $.ig.RevealDataSources([sqlServerDataSource], 
+                [sqlDataSourceItem1, sqlDataSourceItem2, sqlDataSourceItem3], false));
+
+           };
+    </script>
+</body>
+
+</html>

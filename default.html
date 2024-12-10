@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Thumbnails</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://dl.revealbi.io/reveal/libs/1.7.1/infragistics.reveal.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .dashboard-list {
+            max-height: 75vh;
+            overflow-y: auto;
+            width: 400px;
+            padding: 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .dashboard-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .dashboard-item:last-child {
+            border-bottom: none;
+        }
+        .dashboard-thumbnail {
+            height: 75px;
+            width: 100px;
+            background-color: #f8f9fa;
+            margin-right: 15px;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .dashboard-title {
+            font-weight: normal;
+            font-size: 14px;
+        }
+        .dashboard-item:hover {
+            background-color: #f1f1f1;
+        }
+        .dashboard-item.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        .selected-dashboard {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('http://localhost:3100/dashboards')
+                .then(response => response.json())
+                .then(dashboards => {
+                    const dashboardList = document.querySelector('.dashboard-list');
+
+                    dashboards.forEach((dashboardFileName, index) => {
+                        // Derive the dashboard title from the filename
+                        const dashboardTitle = dashboardFileName;
+
+                        // Create the dashboard item container
+                        const dashboardItem = document.createElement('div');
+                        dashboardItem.className = 'dashboard-item';
+
+                        // Create the thumbnail container
+                        const thumbnailDiv = document.createElement('div');
+                        thumbnailDiv.className = 'dashboard-thumbnail';
+                        dashboardItem.appendChild(thumbnailDiv);
+
+                        // Create the title container
+                        const titleDiv = document.createElement('div');
+                        titleDiv.className = 'dashboard-title';
+                        titleDiv.textContent = dashboardTitle;
+                        dashboardItem.appendChild(titleDiv);
+
+                        // Add click event for selection
+                        dashboardItem.addEventListener('click', function () {
+                            // Deselect all items
+                            document.querySelectorAll('.dashboard-item').forEach(item => {
+                                item.classList.remove('selected');
+                            });
+
+                            // Select the clicked item
+                            dashboardItem.classList.add('selected');
+
+                            // Update the selected dashboard details
+                            const selectedDetails = `Title: ${dashboardTitle}<br>File Name: ${dashboardFileName}`;
+                            document.getElementById('dashboard-details').innerHTML = selectedDetails;
+                        });
+
+                        // Fetch and render the thumbnail
+                        fetch(`http://localhost:3100/dashboards/${dashboardFileName}/thumbnail`)
+                            .then(response => response.json())
+                            .then(data => {
+                                const thumbnailView = new $.ig.RevealDashboardThumbnailView(thumbnailDiv);
+                                thumbnailView.dashboardInfo = data.info;
+                            });
+
+                        // Append the dashboard item to the list
+                        dashboardList.appendChild(dashboardItem);
+
+                        // Automatically select the first item
+                        if (index === 0) {
+                            dashboardItem.classList.add('selected');
+                            const selectedDetails = `Title: ${dashboardTitle}<br>File Name: ${dashboardFileName}`;
+                            document.getElementById('dashboard-details').innerHTML = selectedDetails;
+                        }
+                    });
+                });
+        });
+
+    </script>
+</head>
+<body>
+    <h2>Dashboard Thumbnails</h2>
+    <div class="dashboard-list"></div>
+    <div class="selected-dashboard">
+        <strong>Selected Dashboard:</strong>
+        <p id="dashboard-details">None</p>
+    </div>
+</body>
+</html>
